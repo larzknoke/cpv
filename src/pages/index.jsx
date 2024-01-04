@@ -359,7 +359,7 @@ export default function Home() {
         />
         <div></div>
       </div>
-      <div className="w-1/2 flex flex-col p-12 gap-12">
+      <div className="w-1/2 flex flex-col p-12 gap-12 self-center">
         <div className="flex justify-center">
           {workStatus == 1 ? (
             <div className="relative">
