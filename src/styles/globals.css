@@ -17,11 +17,356 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: white;
+  @apply bg-color-gray;
+}
+
+.rotate {
+  animation: spin 5s linear infinite;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.logo {
+  transform: scale(0.8);
+}
+.wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  /* animation: wrapperBox 2.5s; */
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-delay: 2s;
+}
+.green-bar {
+  position: absolute;
+  background-color: #66ac2d;
+  width: 44px;
+  height: 78px;
+  left: calc(50% - 22px);
+  animation: heightGreenBox 1.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+.blue-bar {
+  position: absolute;
+  background-color: #0090d6;
+  width: 122px;
+  height: 44px;
+  left: 0;
+  top: calc(50% - 22px);
+  animation: widthBox 1.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+.blue2-bar {
+  position: absolute;
+  background-color: #0090d6;
+  width: 44px;
+  height: 122px;
+  left: calc(50% - 22px);
+  bottom: 0;
+  animation: heightBox 1.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+.red-bar {
+  position: absolute;
+  background-color: #e61972;
+  width: 78px;
+  height: 44px;
+  right: 0;
+  top: calc(50% - 22px);
+  animation: widthRedBox 1.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes widthBox {
+  0% {
+    width: 0%;
+  }
+  50%,
+  100% {
+    width: 50%;
+  }
+}
+
+@keyframes widthRedBox {
+  0% {
+    width: 0%;
+  }
+  50%,
+  100% {
+    width: 78px;
+  }
+}
+
+@keyframes heightBox {
+  0% {
+    height: 0%;
+  }
+  50%,
+  100% {
+    height: 122px;
+  }
+}
+
+@keyframes heightGreenBox {
+  0% {
+    height: 0%;
+  }
+  50%,
+  100% {
+    height: 78px;
+  }
+}
+
+@keyframes wrapperBox {
+  0% {
+    transform: rotate(360deg);
+  }
+  20%,
+  100% {
+    transform: rotate(0);
+  }
+}
+
+/* POWER ON LOGO */
+svg {
+  overflow: visible;
+}
+#wrapper polygon {
+  /* animation: PowerWrapper 3s infinite ease-in-out; */
+  animation-direction: alternate;
+  transform-origin: center;
+  /* overflow: visible; */
+}
+
+#wrapper {
+  animation: pulse 5s infinite ease-in-out;
+  transform-origin: center center;
+  animation-delay: 1550ms;
+}
+
+@keyframes pulse {
+  0%,
+  96% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(142, 68, 173, 0.7);
+  }
+
+  98% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(142, 68, 173, 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(142, 68, 173, 0);
+  }
+}
+
+@keyframes PowerWrapper {
+  0% {
+    transform: rotate(0);
+  }
+  20%,
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.cls-1 {
+  fill: none;
+  stroke: #fff;
+  stroke-miterlimit: 10;
+  stroke-width: 2.83px;
+  z-index: 999;
+}
+.cls-2 {
+  fill: #e51772;
+  transform-origin: 100% 100%;
+}
+.cls-2,
+.cls-3 {
+  stroke-width: 0px;
+  opacity: 0;
+}
+.cls-3 {
+  fill: #66ad2d;
+}
+
+.red-1,
+.red-2,
+.red-3,
+.red-4,
+.red-5 {
+  transform-origin: 100% 100%;
+  animation: PowerRed 2500ms infinite ease-in-out;
+}
+
+.red-1 {
+  animation-delay: 500ms;
+}
+.red-2 {
+  animation-delay: 1000ms;
+}
+.red-3 {
+  animation-delay: 1500ms;
+}
+.red-4 {
+  animation-delay: 2000ms;
+}
+.red-5 {
+  animation-delay: 2500ms;
+}
+
+@keyframes PowerRed {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  20% {
+    transform: scaleX(100%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-5%);
+    opacity: 0;
+  }
+}
+
+.green-1,
+.green-2,
+.green-3,
+.green-4,
+.green-5 {
+  transform-origin: 100% 0%;
+  animation: PowerGreen 2500ms infinite ease-in-out;
+}
+
+.green-1 {
+  animation-delay: 500ms;
+}
+.green-2 {
+  animation-delay: 1000ms;
+}
+.green-3 {
+  animation-delay: 1500ms;
+}
+.green-4 {
+  animation-delay: 2000ms;
+}
+.green-5 {
+  animation-delay: 2500ms;
+}
+
+@keyframes PowerGreen {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  20% {
+    transform: scaleY(100%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(5%);
+    opacity: 0;
+  }
+}
+
+.elec {
+  fill: #fff;
+  stroke-width: 0px;
+  animation: ElecAnimation 2000ms infinite ease-in-out;
+  animation-direction: alternate;
+}
+
+@keyframes ElecAnimation {
+  0% {
+    transform: translateY(0);
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(-10%) scale(1.05);
+    opacity: 1;
+  }
+}
+
+.battery1,
+.battery2 {
+  fill: white;
+}
+
+/* .battery1 {
+  animation: Bat1Animation 1000ms infinite ease-in-out;
+  animation-direction: alternate;
+  fill: white;
+}
+
+@keyframes Bat1Animation {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-2px);
+  }
+} */
+
+.battery2 {
+  animation: Bat2Animation 5000ms infinite ease-in-out;
+  /* animation-direction: alternate; */
+  animation-delay: 5000ms;
+
+  opacity: 0;
+}
+
+@keyframes Bat2Animation {
+  0% {
+    transform: translateX(-2.5px) translateY(-1px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateX(0px) translateY(-1px);
+  }
+  50%,
+  100% {
+    transform: translateX(-2.5px) translateY(-1px);
+  }
+}
+
+#red-wrapper {
+  animation: RedWrapper 5000ms infinite ease-in-out;
+  transform-origin: 90% center;
+  animation-delay: 5000ms;
+  /* animation-direction: alternate; */
+}
+
+@keyframes RedWrapper {
+  0% {
+    transform: translateX(1px);
+  }
+  20% {
+    transform: translateX(0px) rotate(180deg);
+  }
+  /* 80% {
+    transform: rotate(360deg);
+  } */
+  30%,
+  100% {
+    transform: translateX(-20%) rotate(180deg);
+  }
 }
