@@ -218,7 +218,6 @@ export default function Home() {
     queryClient.queryRows(monthPowerQuery, {
       next: (row, tableMeta) => {
         const data = tableMeta.toObject(row);
-        console.log("data", data);
         setMonthPower((prevMonth) => [...prevMonth, data]);
       },
       error: (err) => {
@@ -233,7 +232,6 @@ export default function Home() {
     queryClient.queryRows(currentMonthPowerQuery, {
       next: (row, tableMeta) => {
         const data = tableMeta.toObject(row);
-        console.log("data", data);
         setCurrentMonthPower(data._value);
       },
       complete: () => {},
@@ -317,11 +315,10 @@ export default function Home() {
 
   return (
     <main className={`flex  p-12 ${titillium.className}`}>
-      <div className="flex flex-col w-1/2 ">
+      <div className="flex flex-col w-3/5 gap-20 ">
         <Bar
           options={optionsWeek}
           data={{
-            // labels: [2, 3, 4, 5, 6, 7, 8],
             datasets: [
               {
                 data: weeklyPower2.map((data) => {
@@ -338,10 +335,8 @@ export default function Home() {
           }}
         />
         <Bar
-          style={{ marginTop: "4em" }}
           options={optionsMonth}
           data={{
-            // labels: [2, 3, 4, 5, 6, 7, 8],
             datasets: [
               {
                 data: monthPower2.map((data) => {
@@ -359,7 +354,7 @@ export default function Home() {
         />
         <div></div>
       </div>
-      <div className="w-1/2 flex flex-col p-12 gap-12 self-center">
+      <div className="w-2/5 flex flex-col gap-12 self-center">
         <div className="flex justify-center">
           {workStatus == 1 ? (
             <div className="relative">
@@ -384,23 +379,20 @@ export default function Home() {
           <div className="font-bold text-[104px] leading-[1em]">
             {power.toFixed(1)}
           </div>
-          <div className="text-5xl text-[#676767]">Aktuell (kW)</div>
+          <div className="text-5xl text-[#828282]">Aktuell (kW)</div>
         </div>
         <div className="text-center">
           <div className="font-bold text-[104px] leading-[1em]">
             {dayPower.toFixed(1)}
           </div>
-          <div className="text-5xl text-[#676767]">Heute (kWh)</div>
+          <div className="text-5xl text-[#828282]">Heute (kWh)</div>
         </div>
         <div className="text-center">
           <div className="font-bold text-[104px] leading-[1em]">
             {totalPower.toFixed(1)}
           </div>
-          <div className="text-5xl text-[#676767]">Gesamt (kWh)</div>
+          <div className="text-5xl text-[#828282]">Gesamt (kWh)</div>
         </div>
-        {/* <div className="flex justify-center">
-          <img className="w-24" src="logo_white.svg" alt="COLOR+ Logo" />
-        </div> */}
       </div>
     </main>
   );
@@ -408,19 +400,22 @@ export default function Home() {
 
 export const optionsWeek = {
   responsive: true,
+  aspectRatio: 2.5,
   scales: {
     x: {
       ticks: {
         font: {
-          size: 20,
+          size: 22,
         },
+        color: "#828282",
       },
     },
     y: {
       ticks: {
         font: {
-          size: 16,
+          size: 20,
         },
+        color: "#828282",
       },
     },
   },
@@ -434,10 +429,13 @@ export const optionsWeek = {
     title: {
       display: true,
       text: "Tagesertrag (kWh)",
-      color: "#606060",
+      color: "#828282",
       position: "left",
       font: {
         size: 28,
+      },
+      padding: {
+        bottom: 50,
       },
     },
     datalabels: {
@@ -456,19 +454,22 @@ export const optionsWeek = {
 };
 export const optionsMonth = {
   responsive: true,
+  aspectRatio: 2.5,
   scales: {
     x: {
       ticks: {
         font: {
-          size: 20,
+          size: 22,
         },
+        color: "#828282",
       },
     },
     y: {
       ticks: {
         font: {
-          size: 16,
+          size: 20,
         },
+        color: "#828282",
       },
     },
   },
@@ -482,10 +483,13 @@ export const optionsMonth = {
     title: {
       display: true,
       text: "Monatsertrag (kWh)",
-      color: "#606060",
+      color: "#828282",
       position: "left",
       font: {
         size: 28,
+      },
+      padding: {
+        bottom: 50,
       },
     },
     datalabels: {
