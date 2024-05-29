@@ -1,5 +1,6 @@
+import dynamic from "next/dynamic";
+import Head from "next/head";
 import { Titillium_Web } from "next/font/google";
-import { InfluxDB } from "@influxdata/influxdb-client";
 import { useState, useEffect } from "react";
 import {
   Chart as ChartJS,
@@ -10,11 +11,22 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import config from "../../tailwind.config";
-import PowerOn from "../components/powerOn";
-import Elec from "../components/Elec";
+import DayBar from "@/components/DayBar";
+import MonthBar from "@/components/MonthBar";
+import { currentWeek, getCurrentYear } from "@/lib/helper";
+import {
+  wortStatusQuery,
+  dailyPowerQuery,
+  currentMonthPowerQuery,
+  weeklyPowerQuery,
+  monthPowerQuery,
+} from "@/lib/queries";
+import { queryClient } from "@/lib/flux";
+
+const ElecData = dynamic(() => import("@/components/ElecData"), {
+  ssr: false,
+});
 
 const titillium = Titillium_Web({
   subsets: ["latin"],
@@ -33,101 +45,14 @@ ChartJS.register(
 
 ChartJS.defaults.font.family = titillium.style.fontFamily;
 
-// INIT CURRENT WEEK
-const currentWeek = Array.from(Array(7).keys()).map((idx) => {
-  const d = new Date();
-  d.setDate(d.getDate() - d.getDay() + idx + 1);
-  return { _time: d, _value: 0 };
-});
-
-// INIT CURRENT YEAR
-function getCurrentYear() {
-  const year = new Date().getFullYear();
-  const yearDates = [];
-  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((month) => {
-    const d = new Date(year, month - 1, 1);
-    yearDates.push({ _time: d, _value: 0 });
-  });
-  return yearDates;
-}
-
 export default function Home() {
   const [workStatus, setWorkStatus] = useState(0);
-  const [power, setPower] = useState(0);
   const [dayPower, setDayPower] = useState(0);
   const [weeklyPower, setWeeklyPower] = useState([]);
   const [weeklyPower2, setWeeklyPower2] = useState([]);
   const [monthPower, setMonthPower] = useState([]);
   const [monthPower2, setMonthPower2] = useState([]);
   const [currentMonthPower, setCurrentMonthPower] = useState(0);
-  const [totalPower, setTotalPower] = useState(0);
-
-  // FLUX API
-  const client = new InfluxDB({
-    url: process.env.NEXT_PUBLIC_INFLUX_URL,
-    token: process.env.NEXT_PUBLIC_INFLUX_TOKEN,
-  });
-  const queryClient = client.getQueryApi(process.env.NEXT_PUBLIC_INFLUX_ORG);
-
-  // Work Status
-  const wortStatusQuery = `
-        from(bucket: "iobroker")
-          |> range(start: 0)
-          |> filter(fn: (r) => r._measurement == "0_userdata.0.photovoltaik.35140_Work_status")
-          |> filter(fn: (r) => r["_field"] == "value")
-          |> last()`;
-
-  // Aktuelle Leistung
-  const currentPowerQuery = `
-        from(bucket: "iobroker")
-          |> range(start: 0)
-          |> filter(fn: (r) => r._measurement == "0_userdata.0.photovoltaik.35031_Total_active_power")
-          |> filter(fn: (r) => r["_field"] == "value")
-          |> last()`;
-
-  // Ertrag "Heute"
-  const dailyPowerQuery = `
-        from(bucket: "iobroker")
-          |> range(start: 0)
-          |> filter(fn: (r) => r._measurement == "0_userdata.0.photovoltaik.35003_Daily_power_yields")
-          |> filter(fn: (r) => r["_field"] == "value")
-          |> last()`;
-
-  // Ertrag "Tag" für eine Woche
-  const weeklyPowerQuery = `
-        import "experimental/date/boundaries"
-        currentWeek = boundaries.week(week_offset: 0)
-        from(bucket: "iobroker")
-            |> range(start: currentWeek.start, stop: currentWeek.stop)
-            |> filter(fn: (r) => r._measurement == "0_userdata.0.photovoltaik.Tagesmenge")
-            |> filter(fn: (r) => r["_field"] == "value")
-          `;
-
-  // Ertrag "Tag" für eine Woche
-  const totalPowerQuery = `
-        from(bucket: "iobroker")
-          |> range(start: 0)
-          |> filter(fn: (r) => r._measurement == "0_userdata.0.photovoltaik.35004_Total_power_yields")
-          |> filter(fn: (r) => r["_field"] == "value")
-          `;
-
-  // Ertrag "Tag" für eine Woche
-  const monthPowerQuery = `
-        import "date"
-        currentYear = date.year(t: now())
-        from(bucket: "iobroker")
-            |> range(start: currentYear-01-01)
-            |> filter(fn: (r) => r._measurement == "0_userdata.0.photovoltaik.Monatsmenge")
-            |> filter(fn: (r) => r["_field"] == "value")
-          `;
-
-  // Ertrag "aktueller Monat"
-  const currentMonthPowerQuery = `
-        from(bucket: "iobroker")
-          |> range(start: 0)
-          |> filter(fn: (r) => r._measurement == "0_userdata.0.photovoltaik.35128_Monthly power yields")
-          |> filter(fn: (r) => r["_field"] == "value")
-          |> last()`;
 
   // Aktuelle Leistung
   const getWorkStatus = () => {
@@ -135,17 +60,6 @@ export default function Home() {
       next: (row, tableMeta) => {
         const data = tableMeta.toObject(row);
         setWorkStatus(data._value);
-      },
-      complete: () => {},
-    });
-  };
-
-  // Aktuelle Leistung
-  const getCurrentPower = () => {
-    queryClient.queryRows(currentPowerQuery, {
-      next: (row, tableMeta) => {
-        const data = tableMeta.toObject(row);
-        setPower(data._value);
       },
       complete: () => {},
     });
@@ -166,6 +80,7 @@ export default function Home() {
   const getWeeklyPower = async () => {
     queryClient.queryRows(weeklyPowerQuery, {
       next: (row, tableMeta) => {
+        console.log(row);
         const data = tableMeta.toObject(row);
         setWeeklyPower((prevWeekly) => [...prevWeekly, data]);
       },
@@ -178,8 +93,19 @@ export default function Home() {
 
   // Woche zusammenbauen
   useEffect(() => {
+    let cleanWeek = [];
+    weeklyPower.filter((item) => {
+      let date = item._time.split("T")[0];
+
+      if (cleanWeek.map((day) => day._time.split("T")[0]).includes(date)) {
+        return false;
+      }
+      cleanWeek.push(item);
+      return true;
+    });
+
     let newWeek = [
-      ...weeklyPower,
+      ...cleanWeek,
       {
         _time: new Date(),
         _value: dayPower,
@@ -202,18 +128,7 @@ export default function Home() {
     setMonthPower2(newMonth);
   }, [monthPower, currentMonthPower]);
 
-  // Ertrag "Total"
-  const getTotalPower = () => {
-    queryClient.queryRows(totalPowerQuery, {
-      next: (row, tableMeta) => {
-        const data = tableMeta.toObject(row);
-        setTotalPower(data._value);
-      },
-      complete: () => {},
-    });
-  };
-
-  // Ertrag "Tag" für eine Woche
+  // Ertrag "Monat" für ein Jahr
   const getMonthlyPower = async () => {
     queryClient.queryRows(monthPowerQuery, {
       next: (row, tableMeta) => {
@@ -242,15 +157,6 @@ export default function Home() {
   useEffect(() => {
     const year = getCurrentYear();
     setMonthPower(year);
-  }, []);
-
-  // Aktuelle Leistung
-  useEffect(() => {
-    getCurrentPower();
-    const powerInterval = setInterval(() => {
-      getCurrentPower();
-    }, 15000); // every 15 seconds
-    return () => clearInterval(powerInterval);
   }, []);
 
   // Work Status
@@ -283,15 +189,6 @@ export default function Home() {
     };
   }, []);
 
-  // Ertrag "Total"
-  useEffect(() => {
-    getTotalPower();
-    const powerInterval = setInterval(() => {
-      getTotalPower();
-    }, 15000); // every 15 seconds
-    return () => clearInterval(powerInterval);
-  }, []);
-
   // Ertrag Monat für Jahr
   useEffect(() => {
     getMonthlyPower();
@@ -314,196 +211,20 @@ export default function Home() {
   }, []);
 
   return (
-    <main className={`flex  p-12 ${titillium.className}`}>
-      <div className="flex flex-col w-3/5 gap-20 ">
-        <Bar
-          options={optionsWeek}
-          data={{
-            datasets: [
-              {
-                data: weeklyPower2.map((data) => {
-                  return {
-                    x: new Date(data._time).toLocaleString("de-DE", {
-                      weekday: "long",
-                    }),
-                    y: data._value,
-                  };
-                }),
-                backgroundColor: config.theme.extend.colors["color-green"],
-              },
-            ],
-          }}
-        />
-        <Bar
-          options={optionsMonth}
-          data={{
-            datasets: [
-              {
-                data: monthPower2.map((data) => {
-                  return {
-                    x: new Date(data._time).toLocaleString("de-DE", {
-                      month: "long",
-                    }),
-                    y: data._value,
-                  };
-                }),
-                backgroundColor: config.theme.extend.colors["color-red"],
-              },
-            ],
-          }}
-        />
-        <div></div>
-      </div>
-      <div className="w-2/5 flex flex-col gap-12 self-center">
-        <div className="flex justify-center">
-          {workStatus == 1 ? (
-            <div className="relative">
-              <div className="w-6 right-0 -top-8 absolute">
-                <Elec />
-              </div>
-              <div className="w-44">
-                <PowerOn />
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <img
-                className="w-40"
-                src="powerOff3.svg"
-                alt="COLOR+ POWER OFF"
-              />
-            </div>
-          )}
+    <>
+      <Head>
+        {/* Page reload every day */}
+        <meta httpEquiv={"refresh"} content="21600" />
+      </Head>
+      <main className={`flex  p-12 ${titillium.className}`}>
+        <div className="flex flex-col w-3/5 gap-20 ">
+          <DayBar weeklyPower2={weeklyPower2} />
+          <MonthBar monthPower2={monthPower2} />
         </div>
-        <div className="text-center">
-          <div className="font-bold text-[104px] leading-[1em]">
-            {power.toFixed(1)}
-          </div>
-          <div className="text-5xl text-[#828282]">Aktuell (kW)</div>
+        <div className="w-2/5 flex flex-col gap-12 self-center">
+          <ElecData workStatus={workStatus} />
         </div>
-        <div className="text-center">
-          <div className="font-bold text-[104px] leading-[1em]">
-            {dayPower.toFixed(1)}
-          </div>
-          <div className="text-5xl text-[#828282]">Heute (kWh)</div>
-        </div>
-        <div className="text-center">
-          <div className="font-bold text-[104px] leading-[1em]">
-            {totalPower.toFixed(1)}
-          </div>
-          <div className="text-5xl text-[#828282]">Gesamt (kWh)</div>
-        </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
-
-export const optionsWeek = {
-  responsive: true,
-  aspectRatio: 2.5,
-  scales: {
-    x: {
-      ticks: {
-        font: {
-          size: 22,
-        },
-        color: "#828282",
-      },
-    },
-    y: {
-      ticks: {
-        font: {
-          size: 20,
-        },
-        color: "#828282",
-      },
-    },
-  },
-  plugins: {
-    legend: {
-      display: false,
-    },
-    tooltip: {
-      enabled: false,
-    },
-    title: {
-      display: true,
-      text: "Tagesertrag (kWh)",
-      color: "#828282",
-      position: "left",
-      font: {
-        size: 28,
-      },
-      padding: {
-        bottom: 50,
-      },
-    },
-    datalabels: {
-      color: "white",
-      display: true,
-      font: {
-        weight: 600,
-        size: "48px",
-        family: titillium.style.fontFamily,
-      },
-      formatter: function (value, context) {
-        return value.y > 0 ? Math.round(value.y) : "";
-      },
-    },
-  },
-};
-export const optionsMonth = {
-  responsive: true,
-  aspectRatio: 2.5,
-  scales: {
-    x: {
-      ticks: {
-        font: {
-          size: 22,
-        },
-        color: "#828282",
-      },
-    },
-    y: {
-      ticks: {
-        font: {
-          size: 20,
-        },
-        color: "#828282",
-      },
-    },
-  },
-  plugins: {
-    legend: {
-      display: false,
-    },
-    tooltip: {
-      enabled: false,
-    },
-    title: {
-      display: true,
-      text: "Monatsertrag (kWh)",
-      color: "#828282",
-      position: "left",
-      font: {
-        size: 28,
-      },
-      padding: {
-        bottom: 50,
-      },
-    },
-    datalabels: {
-      rotation: 270,
-      color: "white",
-      display: true,
-      font: {
-        weight: 600,
-        size: "36px",
-        family: titillium.style.fontFamily,
-      },
-      formatter: function (value, context) {
-        return value.y > 0 ? Math.round(value.y) : "";
-      },
-    },
-  },
-};

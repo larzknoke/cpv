@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@influxdata/influxdb-client": "^1.33.2",
+    "@iobroker/socket-client": "^2.4.14",
     "chart.js": "^4.4.0",
     "chartjs-plugin-datalabels": "^2.2.0",
     "next": "14.0.3",
