@@ -46,7 +46,8 @@ function ElecData({ workStatus }) {
     const currentConsumed =
       values["modbus.2.holdingRegisters.19026_Sum_P1+P2+P3"];
     values["0_userdata.0.photovoltaik.35031_Total_active_power"];
-    const val = (currentPower / (currentConsumed + currentPower)) * 100;
+    let val = (currentPower / (currentConsumed + currentPower)) * 100;
+    val = val > 100 ? 100 : val; // MAX 100%
     setEigen(val);
   }, [values]);
 
@@ -68,17 +69,13 @@ function ElecData({ workStatus }) {
           </div>
         )}
       </div>
-      <div className="flex justify-center gap-16">
-        <div className="text-center">
-          <div className="font-bold text-[104px] leading-[1em]">
-            {values[
-              "0_userdata.0.photovoltaik.35031_Total_active_power"
-            ]?.toFixed(1)}
-            <br />
-            {/* {eigen?.toFixed(0)} */}
-          </div>
-          <div className="text-5xl text-[#828282]">Aktuell (kW)</div>
+      <div className="text-center">
+        <div className="font-bold text-[104px] leading-[1em]">
+          {values[
+            "0_userdata.0.photovoltaik.35031_Total_active_power"
+          ]?.toFixed(1)}
         </div>
+        <div className="text-5xl text-[#828282]">Aktuell (kW)</div>
       </div>
       <div className="text-center">
         <div className="font-bold text-[104px] leading-[1em]">
