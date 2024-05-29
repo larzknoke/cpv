@@ -83,7 +83,7 @@ function ElecData({ workStatus }) {
         </div>
         <div className="text-5xl text-[#828282]">Eigenverbrauch Anteil</div>
       </div>
-      <div className="flex justify-center gap-16">
+      <div className="flex justify-center gap-12">
         <div className="text-center">
           <div className="font-bold text-[104px] leading-[1em]">
             {values[
